@@ -1,5 +1,7 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 export default function Home() {
   const [notes, setNotes] = useState<any[]>([]);
@@ -8,74 +10,122 @@ export default function Home() {
   const [editId, setEditId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
+  const router = useRouter();
 
-  // GET all notes
+  // ✅ Get token safely (only on client)
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+  // ✅ Fetch all notes
   useEffect(() => {
-    fetch("http://localhost:5000/api/notes")
-      .then(res => res.json())
-      .then(data => setNotes(data))
-      .catch(err => console.error("Error fetching notes:", err));
-  }, []);
+    if (!token) {
+      router.push("/login");
+      return;
+    }
 
-  // ADD a new note
+    const fetchNotes = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/notes", {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+
+        if (!res.ok) {
+          toast.error("Failed to fetch notes");
+          return;
+        }
+
+        const data = await res.json();
+        setNotes(data);
+      } catch (err) {
+        toast.error("Error fetching notes");
+      }
+    };
+
+    fetchNotes();
+  }, [token, router]);
+
+  // ✅ Add Note
   const addNote = async () => {
-    if (!title || !content) return alert("Both title and content required");
+    if (!title || !content) return toast.error("Both title and content required");
 
-    const res = await fetch("http://localhost:5000/api/notes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, content }),
-    });
+    try {
+      const res = await fetch("http://localhost:5000/api/notes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: JSON.stringify({ title, content }),
+      });
 
-    if (!res.ok) return alert("Failed to add note");
+      if (!res.ok) return toast.error("Failed to add note");
 
-    const newNote = await res.json();
-    setNotes([...notes, newNote]);
-    setTitle("");
-    setContent("");
-  };
-
-  // DELETE a note
-  const deleteNote = async (id: number) => {
-    const res = await fetch(`http://localhost:5000/api/notes/${id}`, {
-      method: "DELETE",
-    });
-
-    if (res.ok) {
-      setNotes(notes.filter((note) => note.id !== id));
-    } else {
-      alert("Failed to delete note");
+      const newNote = await res.json();
+      setNotes([...notes, newNote]);
+      setTitle("");
+      setContent("");
+      toast.success("Note added successfully!");
+    } catch {
+      toast.error("Error adding note");
     }
   };
 
-  // Start edit
+  // ✅ Delete Note
+  const deleteNote = async (id: number) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/notes/${id}`, {
+        method: "DELETE",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (res.ok) {
+        setNotes(notes.filter((note) => note.id !== id));
+        toast.success("Note deleted successfully!");
+      } else {
+        toast.error("Failed to delete note");
+      }
+    } catch {
+      toast.error("Error deleting note");
+    }
+  };
+
+  // ✅ Start Edit
   const startEdit = (note: any) => {
     setEditId(note.id);
     setEditTitle(note.title);
     setEditContent(note.content);
   };
 
+  // ✅ Cancel Edit
   const cancelEdit = () => {
     setEditId(null);
     setEditTitle("");
     setEditContent("");
   };
 
-  // Save edit
+  // ✅ Save Edit
   const saveEdit = async () => {
     if (editId === null) return;
 
-    const res = await fetch(`http://localhost:5000/api/notes/${editId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: editTitle, content: editContent }),
-    });
+    try {
+      const res = await fetch(`http://localhost:5000/api/notes/${editId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: JSON.stringify({ title: editTitle, content: editContent }),
+      });
 
-    if (!res.ok) return alert("Failed to update note");
+      if (!res.ok) return toast.error("Failed to update note");
 
-    const updated = await res.json();
-    setNotes(notes.map((note) => (note.id === editId ? updated : note)));
-    cancelEdit();
+      const updated = await res.json();
+      setNotes(notes.map((note) => (note.id === editId ? updated : note)));
+      cancelEdit();
+      toast.success("Note updated successfully!");
+    } catch {
+      toast.error("Error updating note");
+    }
   };
 
   return (

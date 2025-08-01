@@ -10,8 +10,24 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "outDir": "./dist",
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true,
+    "baseUrl": ".", 
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "plugins": [
+      { "name": "next" }
+    ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "server.ts"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "next-env.d.ts",
+    "server.ts",
+    ".next/types/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }

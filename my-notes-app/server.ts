@@ -1,6 +1,9 @@
 import express, { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import cors from "cors";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { authenticateToken } from "./middleware/auth"; // middleware for auth
 
 const app = express();
 const prisma = new PrismaClient();
@@ -9,9 +12,13 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());
 
+// ===================== Notes Routes ===================== //
+
 // GET all notes
-app.get("/api/notes", async (req: Request, res: Response) => {
-    const notes = await prisma.note.findMany();
+app.get("/api/notes", authenticateToken, async (req: Request, res: Response) => {
+    const notes = await prisma.note.findMany({
+        where: { userId: (req as any).user.userId },
+    });
     res.json(notes);
 });
 
@@ -21,11 +28,7 @@ app.post("/api/notes", async (req: Request, res: Response) => {
     if (!title || !content) {
         return res.status(400).json({ message: "Title and content required" });
     }
-
-    const newNote = await prisma.note.create({
-        data: { title, content },
-    });
-
+    const newNote = await prisma.note.create({ data: { title, content } });
     res.status(201).json(newNote);
 });
 
@@ -68,7 +71,6 @@ app.patch("/api/notes/:id", async (req: Request, res: Response) => {
     }
 });
 
-
 // DELETE a note
 app.delete("/api/notes/:id", async (req: Request, res: Response) => {
     const id = Number(req.params.id);
@@ -76,6 +78,32 @@ app.delete("/api/notes/:id", async (req: Request, res: Response) => {
     res.json({ message: "Note deleted" });
 });
 
-app.listen(PORT, () =>
-    console.log(`🚀 Server running at http://localhost:${PORT}`)
-);
+// ===================== User Auth Routes ===================== //
+
+// Sign Up
+app.post("/api/signup", async (req: Request, res: Response) => {
+    const { name, email, password } = req.body;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await prisma.user.create({
+        data: { name, email, password: hashedPassword },
+    });
+
+    res.json(newUser);
+});
+
+// Login
+app.post("/api/login", async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+        return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ userId: user.id }, "your-secret-key", { expiresIn: "1h" });
+    res.json({ token });
+});
+
+// ===================== Start Server ===================== //
+app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
