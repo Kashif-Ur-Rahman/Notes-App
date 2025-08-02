@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
+import ParticlesBackground from "../components/ParticlesBackground";
 
 export default function SignupPage() {
     const [name, setName] = useState("");
@@ -31,42 +32,47 @@ export default function SignupPage() {
     };
 
     return (
-        <div className="p-6 max-w-md mx-auto">
-            <h1 className="text-2xl font-bold mb-4">Signup</h1>
-            <input
-                className="border p-2 mb-2 w-full rounded"
-                placeholder="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-            />
-            <input
-                className="border p-2 mb-2 w-full rounded"
-                placeholder="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-                className="border p-2 mb-2 w-full rounded"
-                placeholder="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            />
-            <button
-                className="bg-green-500 text-white px-4 py-2 rounded w-full"
-                onClick={handleSignup}
-            >
-                Signup
-            </button>
+        <div className="relative min-h-screen flex items-center justify-center">
+            <ParticlesBackground />
+            <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+                <div className="p-6 max-w-md mx-auto">
+                    <h1 className="text-2xl font-bold mb-4">Signup</h1>
+                    <input
+                        className="border p-2 mb-2 w-full rounded"
+                        placeholder="Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                    />
+                    <input
+                        className="border p-2 mb-2 w-full rounded"
+                        placeholder="Email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <input
+                        className="border p-2 mb-2 w-full rounded"
+                        placeholder="Password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button
+                        className="bg-green-500 text-white px-4 py-2 rounded w-full"
+                        onClick={handleSignup}
+                    >
+                        Signup
+                    </button>
 
-            <div className="mt-4">
-                <p>
-                    Already have an account?{" "}
-                    <Link href="/login" className="text-blue-500 hover:underline">
-                        Login
-                    </Link>
-                </p>
+                    <div className="mt-4">
+                        <p>
+                            Already have an account?{" "}
+                            <Link href="/login" className="text-blue-500 hover:underline">
+                                Login
+                            </Link>
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     );

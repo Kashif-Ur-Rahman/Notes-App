@@ -19,6 +19,8 @@ export default function Home() {
   const [editContent, setEditContent] = useState("");
   const [editTags, setEditTags] = useState("");
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+
 
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -30,6 +32,7 @@ export default function Home() {
     }
 
     const fetchNotes = async () => {
+      setLoading(true);
       try {
         const res = await fetch("http://localhost:5000/api/notes", {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -44,8 +47,11 @@ export default function Home() {
         setNotes(data);
       } catch {
         toast.error("Error fetching notes");
+      } finally {
+        setLoading(false);
       }
     };
+
 
     fetchNotes();
   }, [token, router]);
@@ -158,6 +164,30 @@ export default function Home() {
           setTags={setTags}
           addNote={addNote}
         />
+
+        {loading ? (
+          <div className="flex justify-center mt-10">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : filteredNotes.length === 0 ? (
+          <p className="text-center text-gray-600 mt-6">No notes found</p>
+        ) : (
+          <NoteList
+            notes={filteredNotes}
+            editId={editId}
+            editTitle={editTitle}
+            editContent={editContent}
+            editTags={editTags}
+            setEditTitle={setEditTitle}
+            setEditContent={setEditContent}
+            setEditTags={setEditTags}
+            startEdit={startEdit}
+            saveEdit={saveEdit}
+            cancelEdit={cancelEdit}
+            deleteNote={deleteNote}
+          />
+        )}
+
         <NoteList
           notes={filteredNotes}
           editId={editId}
