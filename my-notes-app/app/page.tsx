@@ -1,22 +1,28 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Link from "next/link";
+import Navbar from "./components/Navbar";
+import SearchBar from "./components/SearchBar";
+import NoteForm from "./components/NoteForm";
+import NoteList from "./components/NoteList";
 
 export default function Home() {
   const [notes, setNotes] = useState<any[]>([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [tags, setTags] = useState("");
+  const [search, setSearch] = useState("");
   const [editId, setEditId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
+  const [editTags, setEditTags] = useState("");
   const router = useRouter();
 
-  // ✅ Get token safely (only on client)
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-  // ✅ Fetch all notes
   useEffect(() => {
     if (!token) {
       router.push("/login");
@@ -36,7 +42,7 @@ export default function Home() {
 
         const data = await res.json();
         setNotes(data);
-      } catch (err) {
+      } catch {
         toast.error("Error fetching notes");
       }
     };
@@ -44,9 +50,9 @@ export default function Home() {
     fetchNotes();
   }, [token, router]);
 
-  // ✅ Add Note
   const addNote = async () => {
-    if (!title || !content) return toast.error("Both title and content required");
+    if (!title || !content)
+      return toast.error("Both title and content required");
 
     try {
       const res = await fetch("http://localhost:5000/api/notes", {
@@ -55,7 +61,7 @@ export default function Home() {
           "Content-Type": "application/json",
           ...(token && { Authorization: `Bearer ${token}` }),
         },
-        body: JSON.stringify({ title, content }),
+        body: JSON.stringify({ title, content, tags }),
       });
 
       if (!res.ok) return toast.error("Failed to add note");
@@ -64,13 +70,13 @@ export default function Home() {
       setNotes([...notes, newNote]);
       setTitle("");
       setContent("");
+      setTags("");
       toast.success("Note added successfully!");
     } catch {
       toast.error("Error adding note");
     }
   };
 
-  // ✅ Delete Note
   const deleteNote = async (id: number) => {
     try {
       const res = await fetch(`http://localhost:5000/api/notes/${id}`, {
@@ -89,21 +95,20 @@ export default function Home() {
     }
   };
 
-  // ✅ Start Edit
   const startEdit = (note: any) => {
     setEditId(note.id);
     setEditTitle(note.title);
     setEditContent(note.content);
+    setEditTags(note.tags || "");
   };
 
-  // ✅ Cancel Edit
   const cancelEdit = () => {
     setEditId(null);
     setEditTitle("");
     setEditContent("");
+    setEditTags("");
   };
 
-  // ✅ Save Edit
   const saveEdit = async () => {
     if (editId === null) return;
 
@@ -114,7 +119,11 @@ export default function Home() {
           "Content-Type": "application/json",
           ...(token && { Authorization: `Bearer ${token}` }),
         },
-        body: JSON.stringify({ title: editTitle, content: editContent }),
+        body: JSON.stringify({
+          title: editTitle,
+          content: editContent,
+          tags: editTags,
+        }),
       });
 
       if (!res.ok) return toast.error("Failed to update note");
@@ -128,91 +137,42 @@ export default function Home() {
     }
   };
 
+  const filteredNotes = notes.filter(
+    (note) =>
+      note.title.toLowerCase().includes(search.toLowerCase()) ||
+      note.content.toLowerCase().includes(search.toLowerCase()) ||
+      (note.tags && note.tags.toLowerCase().includes(search.toLowerCase()))
+  );
+
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Notes App</h1>
-
-      {/* Add Note Form */}
-      <div className="flex flex-col gap-2 mb-4">
-        <input
-          className="border p-2 rounded"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title"
+    <div className="min-h-screen bg-gray-100">
+      <Navbar />
+      <div className="max-w-3xl mx-auto p-6">
+        <SearchBar search={search} setSearch={setSearch} />
+        <NoteForm
+          title={title}
+          content={content}
+          tags={tags}
+          setTitle={setTitle}
+          setContent={setContent}
+          setTags={setTags}
+          addNote={addNote}
         />
-        <textarea
-          className="border p-2 rounded"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Content"
+        <NoteList
+          notes={filteredNotes}
+          editId={editId}
+          editTitle={editTitle}
+          editContent={editContent}
+          editTags={editTags}
+          setEditTitle={setEditTitle}
+          setEditContent={setEditContent}
+          setEditTags={setEditTags}
+          startEdit={startEdit}
+          saveEdit={saveEdit}
+          cancelEdit={cancelEdit}
+          deleteNote={deleteNote}
         />
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-          onClick={addNote}
-        >
-          Add Note
-        </button>
       </div>
-
-      {/* Notes List */}
-      <ul>
-        {notes.map((note) => (
-          <li
-            key={note.id}
-            className="border p-3 mb-3 rounded flex flex-col gap-2"
-          >
-            {editId === note.id ? (
-              <>
-                <input
-                  className="border p-1 rounded"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  placeholder="Edit Title"
-                />
-                <textarea
-                  className="border p-1 rounded"
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  placeholder="Edit Content"
-                />
-                <div className="flex gap-2">
-                  <button
-                    className="bg-green-500 text-white px-2 py-1 rounded"
-                    onClick={saveEdit}
-                  >
-                    Save
-                  </button>
-                  <button
-                    className="bg-gray-400 text-white px-2 py-1 rounded"
-                    onClick={cancelEdit}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <h3 className="font-bold">{note.title}</h3>
-                <p>{note.content}</p>
-                <div className="flex gap-2">
-                  <button
-                    className="bg-yellow-500 text-white px-2 py-1 rounded"
-                    onClick={() => startEdit(note)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="bg-red-500 text-white px-2 py-1 rounded"
-                    onClick={() => deleteNote(note.id)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }

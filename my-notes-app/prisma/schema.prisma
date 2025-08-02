@@ -17,6 +17,7 @@ model Note {
   createdAt DateTime @default(now())
   userId    Int?
   user      User?    @relation(fields: [userId], references: [id])
+  tags      String?    // store as comma-separated values
 }
 
 model User {

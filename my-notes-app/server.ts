@@ -23,34 +23,41 @@ app.get("/api/notes", authenticateToken, async (req: Request, res: Response) => 
 });
 
 // POST a note
-app.post("/api/notes", async (req: Request, res: Response) => {
-    const { title, content } = req.body;
+app.post("/api/notes", authenticateToken, async (req: Request, res: Response) => {
+    const { title, content, tags } = req.body;
     if (!title || !content) {
         return res.status(400).json({ message: "Title and content required" });
     }
-    const newNote = await prisma.note.create({ data: { title, content } });
+
+    const newNote = await prisma.note.create({
+        data: {
+            title,
+            content,
+            tags: tags || "",  // store tags as string
+            userId: (req as any).user.userId,
+        },
+    });
+
     res.status(201).json(newNote);
 });
 
-// PUT - Full Update
-app.put("/api/notes/:id", async (req: Request, res: Response) => {
-    const id = Number(req.params.id);
-    const { title, content } = req.body;
 
-    if (!title || !content) {
-        return res.status(400).json({ message: "Title and content required" });
-    }
+// PUT - Full Update
+app.put("/api/notes/:id", authenticateToken, async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    const { title, content, tags } = req.body;
 
     try {
         const updatedNote = await prisma.note.update({
             where: { id },
-            data: { title, content },
+            data: { title, content, tags: tags || "" },
         });
         res.json(updatedNote);
-    } catch (error) {
+    } catch {
         res.status(404).json({ message: "Note not found" });
     }
 });
+
 
 // PATCH - Partial Update
 app.patch("/api/notes/:id", async (req: Request, res: Response) => {
@@ -104,6 +111,20 @@ app.post("/api/login", async (req: Request, res: Response) => {
     const token = jwt.sign({ userId: user.id }, "your-secret-key", { expiresIn: "1h" });
     res.json({ token });
 });
+
+// Get User Profile
+app.get("/api/profile", authenticateToken, async (req: any, res: any) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: req.user.userId },
+            select: { id: true, name: true, email: true, createdAt: true },
+        });
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching profile" });
+    }
+});
+
 
 // ===================== Start Server ===================== //
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
