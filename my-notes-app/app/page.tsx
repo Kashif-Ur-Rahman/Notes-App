@@ -19,6 +19,7 @@ export default function Home() {
   const [editTags, setEditTags] = useState("");
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -149,9 +150,17 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Navbar />
-      <div className="max-w-3xl mx-auto p-6">
+      
+      <Navbar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+
+      {/* Main Content */}
+      <div
+        className={`max-w-3xl mx-auto p-6 transition-all duration-300 
+    ${menuOpen ? "mt-48 md:mt-6" : "mt-6"}`}
+      >
+
         <SearchBar search={search} setSearch={setSearch} />
+
         <NoteForm
           title={title}
           content={content}

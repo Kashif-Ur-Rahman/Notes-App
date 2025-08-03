@@ -1,5 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
+import { MdEdit, MdDelete } from "react-icons/md";
+import { MdSave, MdCancel } from "react-icons/md";
 
 interface Note {
     id: number;
@@ -69,24 +71,30 @@ export default function NoteList({
                                 placeholder="Edit Tags (comma separated)"
                             />
 
+
+
                             <div className="flex gap-3 justify-end">
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow"
+                                    className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow"
                                     onClick={saveEdit}
                                 >
-                                    💾 Save
+                                    <MdSave size={18} />
+                                    Save
                                 </motion.button>
+
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md shadow"
+                                    className="flex items-center gap-2 bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md shadow"
                                     onClick={cancelEdit}
                                 >
-                                    ✖ Cancel
+                                    <MdCancel size={18} />
+                                    Cancel
                                 </motion.button>
                             </div>
+
                         </>
                     ) : (
                         // ✅ View Mode
@@ -109,24 +117,30 @@ export default function NoteList({
                                 </div>
                             )}
 
+
+
                             <div className="flex gap-3 justify-end">
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md shadow"
+                                    className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md shadow"
                                     onClick={() => startEdit(note)}
                                 >
-                                    ✏️ Edit
+                                    <MdEdit size={18} />
+                                    Edit
                                 </motion.button>
+
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow"
+                                    className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow"
                                     onClick={() => deleteNote(note.id)}
                                 >
-                                    🗑 Delete
+                                    <MdDelete size={18} />
+                                    Delete
                                 </motion.button>
                             </div>
+
                         </>
                     )}
                 </motion.li>

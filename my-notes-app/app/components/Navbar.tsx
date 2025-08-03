@@ -5,10 +5,14 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 
-export default function Navbar() {
+interface NavbarProps {
+    menuOpen: boolean;
+    setMenuOpen: (value: boolean) => void;
+}
+
+export default function Navbar({ menuOpen, setMenuOpen }: NavbarProps) {
     const router = useRouter();
     const [userName, setUserName] = useState("");
-    const [menuOpen, setMenuOpen] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -78,7 +82,7 @@ export default function Navbar() {
 
             {/* Mobile Dropdown Menu */}
             {menuOpen && (
-                <div className="absolute top-16 left-0 w-full bg-blue-600 text-white flex flex-col items-center gap-4 py-4 md:hidden shadow-lg">
+                <div className="absolute top-16 left-0 w-full bg-blue-600 text-white flex flex-col items-center gap-4 py-4 md:hidden shadow-lg z-50">
                     {userName && <span className="font-medium">Hi, {userName}</span>}
                     <Link
                         href="/"
