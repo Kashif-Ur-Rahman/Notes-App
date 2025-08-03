@@ -1,4 +1,5 @@
 "use client";
+import { motion } from "framer-motion";
 
 interface Note {
     id: number;
@@ -37,74 +38,98 @@ export default function NoteList({
     deleteNote,
 }: NoteListProps) {
     return (
-        <ul>
-            {notes.map((note) => (
-                <li
+        <ul className="grid gap-6 mt-6">
+            {notes.map((note, index) => (
+                <motion.li
                     key={note.id}
-                    className="bg-gray-300 shadow-md rounded-xl p-4 mb-4 border hover:shadow-lg transition"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    className="bg-white shadow-lg rounded-xl p-5 border hover:shadow-xl transition flex flex-col"
                 >
-
                     {editId === note.id ? (
+                        // ✅ Edit Mode
                         <>
                             <input
-                                className="border p-1 rounded"
+                                className="border p-2 rounded mb-2 w-full"
                                 value={editTitle}
                                 onChange={(e) => setEditTitle(e.target.value)}
                                 placeholder="Edit Title"
                             />
                             <textarea
-                                className="border p-1 rounded"
+                                className="border p-2 rounded mb-2 w-full"
                                 value={editContent}
                                 onChange={(e) => setEditContent(e.target.value)}
                                 placeholder="Edit Content"
                             />
                             <input
-                                className="border p-1 rounded"
+                                className="border p-2 rounded mb-3 w-full"
                                 value={editTags}
                                 onChange={(e) => setEditTags(e.target.value)}
-                                placeholder="Edit Tags"
+                                placeholder="Edit Tags (comma separated)"
                             />
-                            <div className="flex gap-2">
-                                <button
-                                    className="bg-green-500 text-white px-2 py-1 rounded"
+
+                            <div className="flex gap-3 justify-end">
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow"
                                     onClick={saveEdit}
                                 >
-                                    Save
-                                </button>
-                                <button
-                                    className="bg-gray-400 text-white px-2 py-1 rounded"
+                                    💾 Save
+                                </motion.button>
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md shadow"
                                     onClick={cancelEdit}
                                 >
-                                    Cancel
-                                </button>
+                                    ✖ Cancel
+                                </motion.button>
                             </div>
                         </>
                     ) : (
+                        // ✅ View Mode
                         <>
-                            <h3 className="font-bold">{note.title}</h3>
-                            <p>{note.content}</p>
+                            <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                                {note.title}
+                            </h3>
+                            <p className="text-gray-600 mb-4">{note.content}</p>
+
                             {note.tags && (
-                                <span className="text-sm text-gray-600">
-                                    Tags: {note.tags}
-                                </span>
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    {note.tags.split(",").map((tag, i) => (
+                                        <span
+                                            key={i}
+                                            className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
+                                        >
+                                            #{tag.trim()}
+                                        </span>
+                                    ))}
+                                </div>
                             )}
-                            <div className="flex gap-2">
-                                <button
-                                    className="bg-yellow-500 text-white px-2 py-1 rounded"
+
+                            <div className="flex gap-3 justify-end">
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md shadow"
                                     onClick={() => startEdit(note)}
                                 >
-                                    Edit
-                                </button>
-                                <button
-                                    className="bg-red-500 text-white px-2 py-1 rounded"
+                                    ✏️ Edit
+                                </motion.button>
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow"
                                     onClick={() => deleteNote(note.id)}
                                 >
-                                    Delete
-                                </button>
+                                    🗑 Delete
+                                </motion.button>
                             </div>
                         </>
                     )}
-                </li>
+                </motion.li>
             ))}
         </ul>
     );

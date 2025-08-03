@@ -1,5 +1,7 @@
 "use client";
 
+import { motion } from "framer-motion";
+
 interface NoteFormProps {
     title: string;
     content: string;
@@ -39,12 +41,15 @@ export default function NoteForm({
                 onChange={(e) => setTags(e.target.value)}
                 placeholder="Tags (comma separated)"
             />
-            <button
+            <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 className="bg-blue-500 text-white px-4 py-2 rounded"
                 onClick={addNote}
             >
                 Add Note
-            </button>
+            </motion.button>
+
         </div>
     );
 }

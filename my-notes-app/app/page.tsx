@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import Link from "next/link";
 import Navbar from "./components/Navbar";
 import SearchBar from "./components/SearchBar";
 import NoteForm from "./components/NoteForm";
@@ -20,7 +19,6 @@ export default function Home() {
   const [editTags, setEditTags] = useState("");
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-
 
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -51,7 +49,6 @@ export default function Home() {
         setLoading(false);
       }
     };
-
 
     fetchNotes();
   }, [token, router]);
@@ -187,21 +184,6 @@ export default function Home() {
             deleteNote={deleteNote}
           />
         )}
-
-        <NoteList
-          notes={filteredNotes}
-          editId={editId}
-          editTitle={editTitle}
-          editContent={editContent}
-          editTags={editTags}
-          setEditTitle={setEditTitle}
-          setEditContent={setEditContent}
-          setEditTags={setEditTags}
-          startEdit={startEdit}
-          saveEdit={saveEdit}
-          cancelEdit={cancelEdit}
-          deleteNote={deleteNote}
-        />
       </div>
     </div>
   );
