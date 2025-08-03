@@ -31,6 +31,7 @@ Users can **add, edit, search, and delete notes** with tags and enjoy smooth ani
 Clone the repository:
 
 git clone https://github.com/Kashif-Ur-Rahman/notes-app.git
+
 cd notes-app
 Install dependencies:
 
