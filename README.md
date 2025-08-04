@@ -33,16 +33,21 @@ Clone the repository:
 git clone https://github.com/Kashif-Ur-Rahman/notes-app.git
 
 cd notes-app
+
 Install dependencies:
 
 npm install
+
 Generate Prisma client:
 
 npx prisma generate
+
 Run the backend server:
 
 npm run dev:server
+
 Run the frontend:
 
 npm run dev
+
 The app will be available at http://localhost:3000
